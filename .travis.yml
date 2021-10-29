@@ -10,13 +10,25 @@ script:
 
 after_success:
   - docker build -t realfakedoors/multi-container-client ./client
-  - docker build -t realfakedoors/multi-container-nginx ./nginx
   - docker build -t realfakedoors/multi-container-server ./server
   - docker build -t realfakedoors/multi-container-worker ./worker
+  - docker build -t realfakedoors/multi-container-nginx ./nginx
   # Log in to the Docker CLI - env vars saved on Travis-CI
   - echo "$docker_password" | docker login -u "$docker_id" --password-stdin
   # Push all images to docker hub
   - docker push realfakedoors/multi-container-client
-  - docker push realfakedoors/multi-container-nginx
   - docker push realfakedoors/multi-container-server
   - docker push realfakedoors/multi-container-worker
+  - docker push realfakedoors/multi-container-nginx
+
+deploy:
+  provider: elasticbeanstalk
+  region: us-west-1
+  app: multi-container-docker
+  env: Multicontainerdocker-env
+  bucket_name: elasticbeanstalk-us-west-1-443154812369
+  bucket_path: docker-multi
+  on:
+    branch: main
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key: $AWS_SECRET_KEY
