@@ -32,3 +32,8 @@ _why are we using external services for redis & postgres in prod when they're ju
 _notes on env vars:_
 - every container in our Elastic Beanstalk instance has access to its env variables.
 - these are set in the *Configuration* tab in the EB environment's dashboard.
+
+_"memory" allocation in Dockerrun containers:_
+- containers' memory on Elastic Beanstalk needs to be set manually.
+- the amount needed varies a lot depending on the process. StackOverflow is a good place to look.
+- we used 128MB across the board here for simplicity's sake.
