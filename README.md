@@ -1,39 +1,19 @@
-## This is a multiple-container sample app for practicing Docker, Travis CI and deploying to AWS.  
+# multi-container-docker
 
-### Dockerrun.aws.json config:
-- a container's name is totally arbitrary.
-- image refers to a previously deployed image on dockerhub.
-- hostname is an optional alias that allows containers to refer to one another, similar to the running *services* in docker-compose.
+## This is a sample application for practicing Kubernetes deployment.
 
-_the 'essential' property:_  
-- at least one container must be marked true.
-- if an essential container crashes, all other containers are shut down.
-- we're choosing to make our nginx container essential because all our other services depend on it.
+*Running this cluster locally:*  
+- make sure Kubernetes is installed and running
+- apply all config files at once with `kubectl apply -f k8s`
 
-_container links:_  
-- refer to another container by name, NOT by hostname
-- one-way connection to direct to another container.
+*Note on combining k8s config files:*  
+We could easily combine two objects like `client-deployment` and `client-cluster-ip` in the same file by separating each config with this on a line: `---`. We're not going to do that in this project, but it's a perfectly viable strategy, based on personal preference.  
 
-_possible Elastic Beanstalk platform issues:_
-- this app is configured to be deployed to EB's 64-bit Amazon Linux platform.
-- this platform will be deprecated in June 2022.
-- other platforms will require a different configuration process and possibly setting up separate docker-compose files.
+*Why doesn't the worker Deployment have a corresponding Service or ports?*  
+- Services are used to send requests into containers, and there's no object in our cluster that needs to send a request to the `multi-container-worker`.
 
-_why are we using external services for redis & postgres in prod when they're just containers in dev?_
-- AWS Elastic Cache automatically creates & maintains instances of professional-grade redis.
-- AWS RDS does the same for postgres instances.
-- RDS also has automatic backups and rollbacks.
-- Super easy to scale if your application gets popular.
-- Built in logging / maintenance.
-- Better security than what we can provide with a standard container.
-- Easier to migrate off EB if we have to.
-- it's almost always easier (and safer) to use a managed data service provider over DIY solutions.
+*What is `persistentVolumeClaim` in `k8s/postgres-deployment.yaml`?*  
+With a Persistent Volume, we can store our data in an object independent of our pods. The `Claim` is a request for this storage, and can be configured by size and access mode.
 
-_notes on env vars:_
-- every container in our Elastic Beanstalk instance has access to its env variables.
-- these are set in the *Configuration* tab in the EB environment's dashboard.
-
-_"memory" allocation in Dockerrun containers:_
-- containers' memory on Elastic Beanstalk needs to be set manually.
-- the amount needed varies a lot depending on the process. StackOverflow is a good place to look.
-- we used 128MB across the board here for simplicity's sake.
+*Creating Encoded Secrets:*  
+There are certain environment variables you can't just drop into a container's spec, like database passwords. Luckily, Kubernetes has an object called a Secret, that we can introduce with an imperative command rather than a config file. In this case, we needed to introduce a `PGPASSWORD` in our cluster, so we manually entered `kubectl create secret generic pgpassword --from-literal PGPASSWORD=<our password>`. `generic` refers to the secret type, the lower-case `pgpassword` sets our secret's name in k8s, and the `--from-literal` flag is to designate that we're adding the secret from this command rather than a file. Then we designate it in our `postgres deployment` container spec and call it in our `server-deployment`'s container spec.   
