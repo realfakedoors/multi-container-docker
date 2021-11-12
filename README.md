@@ -26,3 +26,4 @@ There are certain environment variables you can't just drop into a container's s
 - `kubectl apply -f kubernetes-dashboard.yaml` using the file from this repository
 - `kubectl proxy`
 - in the browser: `http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/`
+- click `SKIP` at the sign-in screen.
