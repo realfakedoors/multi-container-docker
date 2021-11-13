@@ -2,12 +2,18 @@ sudo: required
 services:
   - docker
 before_install:
-  # add encoded service account creds (replace if you're following along!)
+  # add encrypted service account creds
   - openssl aes-256-cbc -K $encrypted_9f3b5599b056_key -iv $encrypted_9f3b5599b056_iv -in service-account.json.enc -out service-account.json -d
   # install the Google Cloud SDK
   - curl https://sdk.cloud.google.com | bash > /dev/null;
   - source $HOME/google-cloud-sdk/path.bash.inc
   # install kubectl
   - gcloud components update kubectl
-  # auth with Google Cloud
+  # auth with Google Cloud and our freshly decrypted service account creds
   - gcloud auth activate-service-account --key-file service-account.json
+  # tell the Google Cloud CLI which project we're working on
+  - gcloud config set project k8s-deploy-practice
+  # specify the data center location in Google Cloud
+  - gcloud config set compute/zone us-central1-c
+  # specify the name of our cluster
+  - gcloud container clusters get-credentials multi-cluster

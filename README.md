@@ -45,3 +45,6 @@ There are certain environment variables you can't just drop into a container's s
 - copy the `openssl` command that it spits out and paste it in `.travis.yml` over line 6.
 - check the `.json.enc` file into git and _DELETE_ the original key file.
 - `exit` the container.
+- update line 15 in `.travis.yml` to your Google Cloud project name (actually the ID in the Projects index table).
+- change line 17 in `.travis.yml` to your Google Cloud data center (found in the `Clusters` table).
+- update line 19 in `.travis.yml` to your cluster's name.
