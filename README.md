@@ -1,8 +1,9 @@
-#### This is a sample application for practicing Kubernetes deployment.
+#### This is a sample application for practicing Kubernetes deployment to Google Cloud.
+##### Link to Udemy course: `https://www.udemy.com/course/docker-and-kubernetes-the-complete-guide/`
 
 ### Running this cluster locally:  
-- make sure Docker Desktop's Kubernetes extension is installed and running
-- apply all config files at once with `kubectl apply -f k8s`
+- make sure Docker Desktop's Kubernetes extension is installed and running.
+- apply all config files at once with `kubectl apply -f k8s`.
 - fire up your browser and head to `localhost` with no port specified.
 
 ### Note on combining k8s config files:  
@@ -19,7 +20,7 @@ There are certain environment variables you can't just drop into a container's s
 
 ### The Ingress Service (`k8s/ingress-service.yaml`):  
 - introduced locally via `kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.0.4/deploy/static/provider/cloud/deploy.yaml`
-- introduced to Google Cloud via ``
+- introduced to Google Cloud via Helm and the ingress-nginx package (see below).
 - For the `kubernetes/ingress-nginx` project in particular, our Ingress acts as both a Controller and Router. The setup of this service changes a bit depending on your environment, but we're configuring this to be deployed locally and on Google Cloud.
 
 ### Running Kubernetes Dashboard for Docker Desktop:  
@@ -29,12 +30,14 @@ There are certain environment variables you can't just drop into a container's s
 - click `SKIP` at the sign-in screen.
 
 ### Deploying to Google Cloud via Github/Travis:  
-- navigate to `console.cloud.google.com`and set up an account
-- create a new Project and enable the Kubernetes Engine
-- fire up a fresh GKE Standard Cluster
 - connect your Github repo to Travis CI.
+
+- navigate to `console.cloud.google.com`and set up an account.
+- create a new Project and enable the Kubernetes Engine.
+- fire up a fresh GKE Standard Cluster.
 - create a new `Service Account` in Google Cloud's `IAM & Admin` dashboard with a `Kubernetes Engine Admin` role.
 - click `Manage Keys` next to your newly created account in the Service Accounts table and create a new key of type JSON. the new key file should download to your computer.
+
 - spin up a new container with the Travis CLI: `docker run -it -v $(pwd):/app ruby:2.4 sh`
 - create a new Github Personal Access Token for Travis that uses [these permissions](https://docs.travis-ci.com/user/github-oauth-scopes/#repositories-on-httpstravis-cicom-private-and-public).
 - `gem install travis` in the new container
@@ -45,6 +48,7 @@ There are certain environment variables you can't just drop into a container's s
 - copy the `openssl` command that it spits out and paste it in `.travis.yml` over line 12.
 - check the `.json.enc` file into git and _DELETE_ the original key file.
 - `exit` the container.
+
 - update line 21 in `.travis.yml` to your Google Cloud project name (actually the ID in the Projects index table).
 - change line 23 in `.travis.yml` to your Google Cloud data center (found in the `Clusters` table).
 - update line 25 to your cluster's name.
@@ -66,6 +70,8 @@ There are certain environment variables you can't just drop into a container's s
 - if there's an error like `charge requires kubeVersion: >=1.16.0-0...`,
   you might need a quick manual cluster upgrade:
   `gcloud container clusters upgrade  YOUR_CLUSTER_NAME --master --cluster-version 1.16`
+
+##### _Now push some code up to Github, and watch the Travis CI job (hopefully) pass!_
 
 ### A note on image tags in `deploy.sh`:  
 We tag our images with a `:latest` version so that all our images are kept current if we need to redeploy our whole cluster, and a `:$GIT_SHA` version as a little trick to be able to refer to a container's production image version with its associated commit if something breaks.
