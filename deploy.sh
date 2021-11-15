@@ -1,6 +1,6 @@
 docker build -t realfakedoors/multi-container-client:latest -t realfakedoors/multi-container-client:$GIT_SHA -f ./client/Dockerfile ./client
-docker build -t realfakedoors/multi-container-server:latest realfakedoors/multi-container-server:$GIT_SHA -f ./server/Dockerfile ./server
-docker build -t realfakedoors/multi-container-worker:latest realfakedoors/multi-container-worker:$GIT_SHA -f ./worker/Dockerfile ./worker
+docker build -t realfakedoors/multi-container-server:latest -t realfakedoors/multi-container-server:$GIT_SHA -f ./server/Dockerfile ./server
+docker build -t realfakedoors/multi-container-worker:latest -t realfakedoors/multi-container-worker:$GIT_SHA -f ./worker/Dockerfile ./worker
 
 docker push realfakedoors/multi-container-client:latest
 docker push realfakedoors/multi-container-client:$GIT_SHA

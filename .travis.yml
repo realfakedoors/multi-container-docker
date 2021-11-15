@@ -31,8 +31,6 @@ before_install:
 script:
   # run tests
   - docker run -e CI=true realfakedoors/react-test npm test
-  # fix unsupported digital envelope routines
-  - export NODE_OPTIONS=--openssl-legacy-provider
 
 deploy:
   # run a custom script file, since Travis can't deploy directly to our cluster.
