@@ -1,6 +1,12 @@
 sudo: required
 services:
   - docker
+env:
+  global:
+    # assign the current commit as a travis env var so we can tag our images with it
+    - GIT_SHA=$(git rev-parse HEAD)
+    # make sure that the Google Cloud CLI doesn't prompt the user for anything during install.
+    - CLOUDSDK_CORE_DISABLE_PROMPTS=1
 before_install:
   # add encrypted service account creds
   - openssl aes-256-cbc -K $encrypted_9f3b5599b056_key -iv $encrypted_9f3b5599b056_iv -in service-account.json.enc -out service-account.json -d
@@ -17,3 +23,19 @@ before_install:
   - gcloud config set compute/zone us-central1-c
   # specify the name of our cluster
   - gcloud container clusters get-credentials multi-cluster
+  # log in to the Docker CLI
+  - echo "$docker_password" | docker login -u "$docker_id" --password-stdin
+  # build a temporary test image
+  - docker build -t realfakedoors/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  # run tests
+  docker run -e CI=true realfakedoors/react-test npm test
+
+deploy:
+  # run a custom script file, since Travis can't deploy directly to our cluster.
+  provider: script
+  script: bash ./deploy.sh
+  on:
+  # only run our deploy script if we push to the main branch.
+    branch: main

@@ -42,9 +42,30 @@ There are certain environment variables you can't just drop into a container's s
 - copy the JSON key file into the working directory
 - `cd app`, `ls`, verify that the file is there
 - `travis encrypt-file <YOUR_KEY_FILE>.json -r <USERNAME>/<REPO> --com`
-- copy the `openssl` command that it spits out and paste it in `.travis.yml` over line 6.
+- copy the `openssl` command that it spits out and paste it in `.travis.yml` over line 12.
 - check the `.json.enc` file into git and _DELETE_ the original key file.
 - `exit` the container.
-- update line 15 in `.travis.yml` to your Google Cloud project name (actually the ID in the Projects index table).
-- change line 17 in `.travis.yml` to your Google Cloud data center (found in the `Clusters` table).
-- update line 19 in `.travis.yml` to your cluster's name.
+- update line 21 in `.travis.yml` to your Google Cloud project name (actually the ID in the Projects index table).
+- change line 23 in `.travis.yml` to your Google Cloud data center (found in the `Clusters` table).
+- update line 25 to your cluster's name.
+- update line 27 to your own docker login env vars in Travis settings (case sensitive).
+- update lines 29 and 33 to your own test image name and docker id.
+- in `deploy.sh`, replace all image names with your own.  
+
+##### in your Google Cloud cluster, open a Cloud Shell Terminal session and run these commands to set up your env: 
+- `gcloud config set project <YOUR PROJECT ID>`
+- `gcloud config set compute/zone <YOUR REGION>`
+- `gcloud container clusters get-credentials <YOUR CLUSTER NAME>`
+
+##### Install Helm (a k8s package manager) and ingress-nginx in your Cloud Shell:
+- `curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3`
+- `chmod 700 get_helm.sh`
+- `./get_helm.sh`
+- `helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx`
+- `helm install my-release ingress-nginx/ingress-nginx`
+- if there's an error like `charge requires kubeVersion: >=1.16.0-0...`,
+  you might need a quick manual cluster upgrade:
+  `gcloud container clusters upgrade  YOUR_CLUSTER_NAME --master --cluster-version 1.16`
+
+### A note on image tags in `deploy.sh`:  
+We tag our images with a `:latest` version so that all our images are kept current if we need to redeploy our whole cluster, and a `:$GIT_SHA` version as a little trick to be able to refer to a container's production image version with its associated commit if something breaks.
